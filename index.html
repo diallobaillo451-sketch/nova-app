@@ -7,8 +7,6 @@
 <meta name="apple-mobile-web-app-title" content="Nova">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Nova</title>
-<link rel="icon" type="image/webp" href="/manus-storage/async-images/OThxUdIEbBTZe5Q0Y245zp/image-1.webp">
-<link rel="apple-touch-icon" href="/manus-storage/async-images/OThxUdIEbBTZe5Q0Y245zp/image-1.webp">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark;--bg:#f2f2f7;--card:#fff;--fg:#000;--mute:#8e8e93;--glass:rgba(255,255,255,.7);--line:rgba(60,60,67,.2);--blue:#007aff;--fill:rgba(120,120,128,.16);--sc:1;--op:.85}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--card:#1c1c1e;--fg:#fff;--mute:#98989f;--glass:rgba(44,44,48,.7);--line:rgba(120,120,128,.35);--blue:#0a84ff;--fill:rgba(120,120,128,.32)}}
@@ -22,9 +20,6 @@ h2{font:700 22px/1.2 -apple-system,sans-serif;margin:6px 20px 12px;letter-spacin
 h3{font:700 26px/1.15 -apple-system,sans-serif;margin:4px 0 14px;letter-spacing:-.015em}
 .glass{background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);border:.5px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 10px 30px rgba(0,0,0,.14)}
 .top{display:flex;align-items:center;justify-content:space-between;padding-right:20px}
-.brandbar{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:16px;z-index:8;display:flex;align-items:center;gap:10px;padding:7px 12px 7px 8px;border-radius:22px;color:var(--fg);font:700 15px -apple-system,sans-serif;letter-spacing:-.01em}
-.brandbar img,.brand-logo{width:30px;height:30px;border-radius:9px;object-fit:cover;background:linear-gradient(145deg,#fff,#cdd5e1);box-shadow:0 2px 10px rgba(0,0,0,.22)}
-.brandbar small{font-size:10px;letter-spacing:.14em;color:var(--mute);margin-left:-4px}
 .add{width:38px;height:38px;border-radius:50%;border:0;background:var(--fill);color:var(--blue);font-size:26px;line-height:1;margin-top:6px}
 .hero{margin:0 20px 24px;border-radius:30px;padding:22px;min-height:210px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 14px 34px rgba(0,0,0,.25)}
 .hero small{font-weight:600;opacity:.85}
@@ -112,8 +107,6 @@ h3{font:700 26px/1.15 -apple-system,sans-serif;margin:4px 0 14px;letter-spacing:
 #mon{left:50%;right:auto;bottom:10px;transform:translateX(-50%);padding:6px 14px;border-radius:16px;background:rgba(255,255,255,.1);color:#d1d1d6;font:600 13px ui-rounded,-apple-system,sans-serif;letter-spacing:.04em;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 @media(orientation:landscape){#screen{top:0;height:100%;left:50%;right:auto;transform:translateX(-50%)}.zone{transform:scale(calc(var(--sc)*.78))}}
 #ejs{width:100%;height:100%}
-.live .pad{display:flex}
-.live #screen{top:calc(60px + env(safe-area-inset-top,0px));bottom:0;height:auto;aspect-ratio:auto;left:0;right:0;transform:none;padding:0;background:#000;display:block}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .hero{position:relative;margin:calc(-1*env(safe-area-inset-top,0px)) 0 26px;height:min(74vh,640px);padding:calc(18px + env(safe-area-inset-top,0px)) 16px 16px;border-radius:0 0 44px 44px;background-size:cover;background-position:center;box-shadow:0 20px 50px rgba(0,0,0,.3);overflow:hidden}
@@ -142,18 +135,63 @@ h3{font:700 26px/1.15 -apple-system,sans-serif;margin:4px 0 14px;letter-spacing:
 #toast.on{transform:translate(-50%,0)}
 .btn:active,.cover:active,.wide:active,#tabs button:active,.play:active{transform:scale(.96)}
 .px #ejs canvas{image-rendering:pixelated}
+
+/* ===== Lecteur : écran, manette Nova, paysage ===== */
+#pbar{z-index:5;transition:opacity .35s}
+.idle #pbar{opacity:0;pointer-events:none}
+#ejsf{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;pointer-events:none}
+.live #msg,.live #mon{display:none}
+.live #screen{top:calc(56px + env(safe-area-inset-top,0px));bottom:auto;height:auto;aspect-ratio:4/3;left:0;right:0;transform:none;padding:0;background:#000;display:block}
+.live.tall #screen{bottom:0;aspect-ratio:auto}
+@media(orientation:landscape){
+ .live #screen,.live.tall #screen{top:0;bottom:0;height:100%;width:100%;aspect-ratio:auto;left:0;right:0}
+ .pad{inset:0;padding:0;display:block;--m:max(20px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px))}
+ .swap .pad{direction:rtl}
+ .zone{display:contents}
+ .zl{--ox:0%}.zr{--ox:100%}.swap .zl{--ox:100%}.swap .zr{--ox:0%}
+ .pad .sh,.pad .dpad,.pad .faces,.pad .stick,.pad .mid{position:absolute}
+ .pad .sh{top:calc(10px + env(safe-area-inset-top,0px));scale:var(--sc);transform-origin:var(--ox) 0}
+ .zl .sh{inset-inline-start:var(--m)}.zr .sh{inset-inline-end:var(--m)}
+ .pad .dpad,.pad .faces{bottom:calc(84px + env(safe-area-inset-bottom,0px));scale:calc(var(--sc)*.86);transform-origin:var(--ox) 100%}
+ .pad .dpad{inset-inline-start:var(--m)}.pad .faces{inset-inline-end:var(--m)}
+ .pad .stick{bottom:calc(14px + env(safe-area-inset-bottom,0px));scale:calc(var(--sc)*.7);transform-origin:var(--ox) 100%}
+ .zl .stick{inset-inline-start:calc(var(--m) + 122px)}.zr .stick{inset-inline-end:calc(var(--m) + 122px)}
+ .pad .mid{bottom:calc(14px + env(safe-area-inset-bottom,0px));flex-direction:row;transform:translateX(-50%);scale:var(--sc);transform-origin:50% 100%}
+}
+/* ===== Page de lancement ===== */
+#boot{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#fff;padding:calc(60px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) calc(36px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));background:#000;opacity:0;visibility:hidden;transform:scale(1.08);transition:opacity .5s ease,visibility 0s .5s,transform .6s cubic-bezier(.2,.8,.2,1)}
+.booting #boot{opacity:1;visibility:visible;transform:none;transition:opacity .35s ease}
+.booting .pad{visibility:hidden}.booting #ptitle{opacity:0}
+.booting.idle #pbar{opacity:1;pointer-events:auto}
+#bbg{position:absolute;inset:-70px;background-size:cover;background-position:center;filter:blur(48px) saturate(1.7) brightness(.55);transform:scale(1.2)}
+#boot:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.6))}
+#bcard{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center}
+#bart{display:grid;place-items:center;width:min(46vw,170px);aspect-ratio:3/4;border-radius:38px;margin-bottom:24px;background-size:cover;background-position:center;box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 0 0 .5px rgba(255,255,255,.35);animation:lift .9s cubic-bezier(.2,.8,.2,1) both}
+#bart b{font:800 54px/1 -apple-system,sans-serif;letter-spacing:-.03em}
+@keyframes lift{from{opacity:0;transform:scale(.86) translateY(16px)}}
+#btx{display:flex;flex-direction:column;align-items:inherit;width:min(76vw,260px)}
+#bname{font:700 28px/1.12 -apple-system,"SF Pro Display",sans-serif;letter-spacing:-.03em;margin:0}
+#bsys{font:500 15px -apple-system,sans-serif;color:rgba(255,255,255,.62);margin-top:3px}
+#bar{width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:26px}
+#bfill{display:block;height:100%;width:0;border-radius:3px;background:#fff;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.ind #bfill{width:38%;animation:ind 1.3s ease-in-out infinite alternate}
+@keyframes ind{to{transform:translateX(163%)}}
+.err #bfill{width:100%;background:#ff453a;animation:none}
+#bstat{font:500 13px/1.3 -apple-system,sans-serif;color:rgba(255,255,255,.72);margin-top:10px;min-height:17px}
+@media(orientation:landscape){#bcard{flex-direction:row;gap:34px;text-align:left}#bart{width:min(36vh,150px);margin:0}#btx{align-items:flex-start;width:min(46vw,300px)}}
+@media(prefers-reduced-motion:reduce){#bart,.ind #bfill{animation:none}}
 </style>
 </head>
 <body>
-<div class="brandbar glass" aria-label="Nova, manette premium"><svg class="brand-logo" viewBox="0 0 64 64" role="img" aria-label="Logo Nova"><defs><linearGradient id="novaMark" x1="14" y1="10" x2="52" y2="54" gradientUnits="userSpaceOnUse"><stop stop-color="#2f3a4d"/><stop offset=".55" stop-color="#111820"/><stop offset="1" stop-color="#0a84ff"/></linearGradient></defs><path fill="url(#novaMark)" d="M14 28c0-8 7-13 15-10 2 .8 4 .8 6 0 8-3 15 2 15 10 0 8-5 17-11 20-3 1-6-2-9-2s-6 3-9 2C19 45 14 36 14 28Z"/><path fill="#0a84ff" d="M36 15c1-6 6-9 11-9-1 5-5 9-11 9Z"/><path fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" d="M23 27v8m-4-4h8"/><circle cx="40" cy="28" r="2" fill="#fff"/><circle cx="46" cy="34" r="2" fill="#30d158"/></svg><span>Nova</span><small>PLAY</small></div>
- <div id="view"></div>
+<div id="view"></div>
 <div id="tabwrap"><nav id="tabs" class="glass"></nav></div>
 <div id="scrim" data-act="close"></div>
 <div id="sheet" class="glass"></div>
-<input type="file" id="file" hidden><input type="file" id="img" accept="image/*" hidden><div id="toast" class="glass"></div>
+<input type="file" id="file" multiple hidden><input type="file" id="img" accept="image/*" hidden><div id="toast" class="glass"></div>
 <div id="player">
   <div id="pbar"><button class="pill" data-act="quit">Fermer</button><span id="ptitle" class="pill"></span></div>
   <div id="screen"><div id="msg"></div><div id="mon"></div></div>
+  <div id="boot"><div id="bbg"></div><div id="bcard"><div id="bart"></div><div id="btx"><h3 id="bname"></h3><div id="bsys"></div><div id="bar"><i id="bfill"></i></div><div id="bstat" aria-live="polite"></div></div></div></div>
   <div class="pad">
     <div class="zone zl">
       <div class="sh"><b class="gb" data-k="L2">L2</b><b class="gb" data-k="L1">L1</b></div>
@@ -189,6 +227,8 @@ try{const d=JSON.parse(localStorage.getItem(KEY)||'{}');Object.assign(S,d);S.set
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const V={tab:'home',q:'',f:'all'};      // état de l'interface
 const FILES=new Map();                  // fichiers de la session (iOS ne garde pas l'accès entre deux visites)
+const db=(m,k,v)=>new Promise((ok,ko)=>{const o=indexedDB.open('nova-roms',1);o.onupgradeneeded=()=>o.result.createObjectStore('f');o.onerror=()=>ko(o.error);
+ o.onsuccess=()=>{const t=o.result.transaction('f',m==='get'?'readonly':'readwrite'),s=t.objectStore('f'),q=m==='get'?s.get(k):m==='put'?s.put(v,k):s.delete(k);t.oncomplete=()=>{o.result.close();ok(q.result)};t.onerror=t.onabort=()=>ko(t.error)}});
 let P=null,RELINK=null;                 // jeu en cours d'ajout, jeu à re-sélectionner
 const TEST={id:'test',name:'Test des commandes',sys:'ps2',size:0};
 const all=()=>[TEST,...S.games];
@@ -248,7 +288,7 @@ const views={
    <div class="li">Zone morte<input type="range" min="0" max=".4" step=".02" value="${s.dz}" data-in="dz"></div>
   </div>
   <div class="grp">${sw('hap','Retour haptique')}${sw('fade','Fondu automatique')}${sw('mono','Boutons monochromes')}${sw('swap','Disposition gaucher')}</div>
-  <p class="cap">Le retour haptique utilise une astuce de Safari et dépend de ta version d'iOS. Ces réglages s'appliquent à la manette de Nova ; en jeu PS1 et Nintendo, la manette du moteur s'affiche.</p>
+  <p class="cap">Le retour haptique utilise une astuce de Safari et dépend de ta version d'iOS. Ces réglages s'appliquent à la manette de Nova, y compris dans les jeux.</p>
   <div style="padding:0 20px"><button class="btn" data-act="play" data-id="test">Tester la manette</button></div>`},
  set(){const s=S.set;return`<h1>Réglages</h1>
   <h2>Image et son</h2>${qual('')}
@@ -259,7 +299,7 @@ const views={
   <h2>Apparence</h2>${seg('theme',[['auto','Auto'],['light','Clair'],['dark','Sombre']],s.theme)}
   <h2>Moteurs</h2>
   <div class="grp"><div class="li">PlayStation 2<span>App Play!</span></div><div class="li">PSP<span>App PPSSPP</span></div><div class="li">PlayStation<span>Intégré</span></div><div class="li">Nintendo<span>Intégré</span></div></div>
-  <p class="cap">PS1 et Nintendo tournent dans Nova (EmulatorJS, connexion requise). PS2 et PSP : utilise les apps Play! et PPSSPP. Safari ne garde pas l'accès au fichier du jeu : choisis-le à chaque lancement.</p>
+  <p class="cap">PS1 et Nintendo tournent dans Nova (EmulatorJS, connexion requise). PS2 et PSP : utilise les apps Play! et PPSSPP. Nova garde une copie de chaque jeu ajouté : plus besoin de le re-choisir.</p>
   <h2>Installer</h2><div class="grp"><div class="li">Partager, puis « Sur l'écran d'accueil »</div></div>
   <p class="cap">Utilise uniquement des jeux issus de tes propres disques (et un BIOS issu de ta propre console si ton moteur en demande un).</p>`}
 };
@@ -288,7 +328,7 @@ const detail=id=>{
 const addSheet=()=>openSheet(`<h3>Nouveau jeu</h3>
  <input class="search" id="nm" style="width:100%;margin:0 0 12px" value="${esc(P.name)}" aria-label="Nom du jeu">
  <div class="seg" style="margin:0 0 6px">${Object.keys(SYS).map(k=>`<button class="${P.sys===k?'on':''}" data-act="sys" data-v="${k}">${SYS[k].s}</button>`).join('')}</div>
- <p class="cap" style="margin:6px 4px 0">${esc(P.file.name)}${P.file.size?', '+fmt(P.file.size):''}</p>
+ <p class="cap" style="margin:6px 4px 0">${esc(P.file.name)}${P.file.size?', '+fmt(P.file.size):''}</p>${/\.(zip|7z|rar)$/i.test(P.file.name)?'<p class="cap" style="margin:6px 4px 0">Archive compressée : la décompression est très lente sur iPhone. Extrais le .iso ou .bin avant.</p>':P.file.size>5.5e8?'<p class="cap" style="margin:6px 4px 0">Image volumineuse : le lancement demande environ deux fois sa taille en mémoire. Un fichier .chd est plus sûr.</p>':''}
  <button class="btn" data-act="commit">Ajouter à la bibliothèque</button>`);
 
 /* ---------- Moteur d'émulation (point de branchement) ---------- */
@@ -296,29 +336,58 @@ const CDN="https://cdn.emulatorjs.org/stable/data/";
 const CORE={ps1:"psx",nes:"nes",fds:"nes",sfc:"snes",smc:"snes",gb:"gb",gbc:"gb",gba:"gba",nds:"nds",n64:"n64",z64:"n64",v64:"n64"};
 const NOENG={ps2:"PS2 : aucun moteur web. Utilise l'app native Play!.",psp:"PSP : le moteur web ne fonctionne pas sur Safari. Utilise l'app PPSSPP (App Store)."};
 let live=false;
-const EJS_CONTROLS={0:{0:{value:'x',value2:'BUTTON_2'},1:{value:'s',value2:'BUTTON_4'},2:{value:'shift',value2:'SELECT'},3:{value:'enter',value2:'START'},4:{value:'up arrow',value2:'DPAD_UP'},5:{value:'down arrow',value2:'DPAD_DOWN'},6:{value:'left arrow',value2:'DPAD_LEFT'},7:{value:'right arrow',value2:'DPAD_RIGHT'},8:{value:'z',value2:'BUTTON_1'},9:{value:'a',value2:'BUTTON_3'},10:{value:'q',value2:'LEFT_TOP_SHOULDER'},11:{value:'e',value2:'RIGHT_TOP_SHOULDER'},12:{value:'1',value2:'LEFT_BOTTOM_SHOULDER'},13:{value:'3',value2:'RIGHT_BOTTOM_SHOULDER'},14:{value:'',value2:'LEFT_STICK'},15:{value:'',value2:'RIGHT_STICK'},16:{value:'h',value2:'LEFT_STICK_X:+1'},17:{value:'f',value2:'LEFT_STICK_X:-1'},18:{value:'g',value2:'LEFT_STICK_Y:+1'},19:{value:'t',value2:'LEFT_STICK_Y:-1'},20:{value:'l',value2:'RIGHT_STICK_X:+1'},21:{value:'j',value2:'RIGHT_STICK_X:-1'},22:{value:'k',value2:'RIGHT_STICK_Y:+1'},23:{value:'i',value2:'RIGHT_STICK_Y:-1'}},1:{},2:{},3:{}};
-const INPUT_KEYS={tri:'s',cir:'x',crs:'z',sqr:'a',up:'up arrow',down:'down arrow',left:'left arrow',right:'right arrow',L1:'q',R1:'e',L2:'1',R2:'3',select:'shift',start:'enter'};
-const KEY_CODES={'backspace':8,'tab':9,'enter':13,'shift':16,'left arrow':37,'up arrow':38,'right arrow':39,'down arrow':40};
-const pressed=new Set();
-const sendKey=(key,type)=>{const target=$('#ejs')||document;if(!target)return;const name=key.includes('arrow')?({ 'up arrow':'ArrowUp','down arrow':'ArrowDown','left arrow':'ArrowLeft','right arrow':'ArrowRight'})[key]:(key==='shift'?'Shift':key==='enter'?'Enter':key);const code=KEY_CODES[key]||((key.length===1)?key.toUpperCase().charCodeAt(0):0);const e=new KeyboardEvent(type,{key:name,code:name.length===1?'Key'+name.toUpperCase():name,bubbles:true,cancelable:true});Object.defineProperty(e,'keyCode',{value:code});Object.defineProperty(e,'which',{value:code});target.dispatchEvent(e)};
 const snap=async(id,e)=>{try{const s=e&&e.screenshot;if(!s)return;const u=typeof s==='string'?s:URL.createObjectURL(s instanceof Blob?s:new Blob([s],{type:'image/png'}));const d=await shrink(u,640,0);if(typeof s!=='string')URL.revokeObjectURL(u);const g=S.games.find(x=>x.id===id);if(g&&setImg(id,'sh',d)){g.saved=Date.now();save();toast('Sauvegarde détectée')}}catch(err){}};
+const HIDE='[class*=ejs_virtualGamepad],.ejs_menu_bar,.ejs_start_button,.ejs_message,.ejs_context_menu,.ejs_settings_parent,.ejs_cache_text{display:none!important}.ejs_loading_text{opacity:0!important}';
+const BTN=Object.fromEntries('playPause restart mute settings fullscreen saveState loadState screenRecord gamepad cheat volume saveSavFiles loadSavFiles quickSave quickLoad screenshot cacheManager exitEmulation'.split(' ').map(k=>[k,false]));
+const IDX={crs:0,sqr:1,select:2,start:3,up:4,down:5,left:6,right:7,cir:8,tri:9,L1:10,R1:11,L2:12,R2:13},AX=[['lx',16,17],['ly',18,19],['rx',20,21],['ry',22,23]];
+let sent={},url='',tick=0;
+const frame=()=>$('#ejsf'),emu=()=>{try{return frame().contentWindow.EJS_emulator}catch(e){}};
+const boot={
+ on(g){$('#bbg').style.cssText=pic(g,'cv','sh');$('#bart').style.cssText=pic(g,'cv');$('#bart').innerHTML=img(g.id,'cv')?'':`<b>${esc(ini(g.name))}</b>`;$('#bname').textContent=g.name;$('#bsys').textContent=SYS[g.sys].n;boot.set(null,'Préparation…');const p=$('#player');p.classList.remove('started');p.classList.add('booting')},
+ set(p,t,err){const b=$('#boot');b.classList.toggle('err',!!err);b.classList.toggle('ind',p==null&&!err);$('#bfill').style.width=p==null?'':Math.round(p)+'%';if(t)$('#bstat').textContent=t},
+ off(){clearInterval(tick);const p=$('#player');p.classList.remove('booting');p.classList.add('started')}
+};
+/* Lit la progression du moteur (son texte interne, invisible) et la montre dans NOTRE page de lancement */
+const watch=()=>{clearInterval(tick);tick=setInterval(()=>{
+ const f=frame(),d=f&&f.contentDocument;if(!d||!d.body)return;
+ const sb=d.querySelector('.ejs_start_button');if(sb&&!sb.dataset.n){sb.dataset.n=1;sb.click()}
+ const t=(d.querySelector('.ejs_loading_text')||{}).textContent||'',m=t.match(/(\d+(?:[.,]\d+)?)\s*%/),p=m?parseFloat(m[1].replace(',','.')):null,core=/core/i.test(t);
+ if(/error|fail/i.test(t))return boot.set(100,'Le jeu n’a pas pu démarrer. Vérifie le fichier ou ta connexion.',1);
+ if(t)boot.set(p==null?null:core?p*.4:40+p*.55,core?'Préparation du moteur':/decompress/i.test(t)?'Décompression du jeu':'Chargement du jeu')},250)};
 const engine={
-	 async load(g,file){
+ async load(g,file){
   if(g.id==='test')return{t:'Mode test',m:'Appuie sur les boutons et bouge les sticks pour régler ta disposition.'};
-  if(!file)return{t:'Fichier manquant',m:'Sélectionne à nouveau la ROM pour lancer ce jeu.'};
   if(NOENG[g.sys])return{t:'Moteur indisponible',m:NOENG[g.sys]};
   const ext=file.name.split('.').pop().toLowerCase(),core=g.sys==='ps1'?CORE.ps1:CORE[ext];
   if(!core)return{t:'Format non pris en charge',m:"."+ext+" n'est pas reconnu pour "+SYS[g.sys].n+"."};
-  live=true;$('#player').classList.add('live');$('#screen').innerHTML='<div id="ejs"></div>';
-  const c=eff(g.id),num=[...g.id].reduce((a,ch)=>(a*31+ch.charCodeAt(0))>>>0,7)%1e9+2;
-  Object.assign(window,{EJS_player:'#ejs',EJS_core:core,EJS_gameUrl:URL.createObjectURL(file),EJS_gameName:g.name,EJS_gameID:num,EJS_pathtodata:CDN,EJS_color:'#0a84ff',EJS_backgroundColor:'#000',EJS_askBeforeExit:false,EJS_volume:c.vol,EJS_forceLegacyCores:!!c.gl1,EJS_defaultControls:EJS_CONTROLS,EJS_VirtualGamepadSettings:[],EJS_Buttons:{gamepad:{visible:false}},EJS_fixedSaveInterval:15000,EJS_defaultOptions:Object.assign({'save-state-location':'browser','virtual-gamepad':'disabled','menu-bar-button':'hidden'},c.crt?{shader:'crt-mattias.glslp'}:{}),EJS_onSaveUpdate:e=>snap(g.id,e),EJS_onExit:()=>location.reload()});
-  const sc=document.createElement('script');sc.src=CDN+'loader.js';
-  sc.onerror=()=>{live=false;$('#player').classList.remove('live');$('#screen').innerHTML='<div id="msg"><b>Moteur introuvable</b><span>Le chargement a échoué. Vérifie ta connexion ou l\'hébergement de la page.</span></div><div id="mon"></div>'};
-  document.head.appendChild(sc);return null;
+  const c=eff(g.id),num=[...g.id].reduce((a,ch)=>(a*31+ch.charCodeAt(0))>>>0,7)%1e9+2,pl=$('#player');
+  live=true;sent={};pl.classList.add('live');pl.classList.toggle('tall',ext==='nds');url=URL.createObjectURL(file);
+  window.__nova={snap:e=>snap(g.id,e),started:()=>{try{localStorage.removeItem('nova.boot')}catch(e){}boot.off()},fail:()=>boot.set(100,'Moteur introuvable. Vérifie ta connexion.',1),
+   cfg:{EJS_player:'#g',EJS_core:core,EJS_gameUrl:url,EJS_gameName:g.name,EJS_gameID:num,EJS_pathtodata:CDN,EJS_startOnLoaded:true,EJS_disableLocalStorage:true,EJS_askBeforeExit:false,EJS_color:'#0a84ff',EJS_backgroundColor:'#000',EJS_volume:c.vol,EJS_forceLegacyCores:!!c.gl1,EJS_fixedSaveInterval:15000,
+    EJS_CacheLimit:1,EJS_cacheConfig:{enabled:true,cacheMaxSizeMB:2048,cacheMaxAgeMins:43200},EJS_Buttons:BTN,
+    EJS_defaultOptions:Object.assign({'save-state-location':'browser','virtual-gamepad':'disabled'},c.crt?{shader:'crt-mattias.glslp'}:{}),EJS_onExit:()=>{}}};
+  const f=document.createElement('iframe');f.id='ejsf';f.setAttribute('allow','autoplay;fullscreen');
+  f.srcdoc=`<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><style>html,body,#g{margin:0;width:100%;height:100%;background:#000;overflow:hidden}${HIDE}${c.px?'canvas{image-rendering:pixelated}':''}</style><div id=g></div><script>(()=>{const N=parent.__nova,AC=window.AudioContext||window.webkitAudioContext,A=[];
+if(AC){const W=function(...a){const c=new AC(...a);A.push(c);return c};W.prototype=AC.prototype;window.AudioContext=window.webkitAudioContext=W}
+N.unlock=()=>A.forEach(c=>c.state!=='running'&&c.resume().catch(()=>0));N.kill=()=>A.forEach(c=>c.close().catch(()=>0));
+Object.assign(window,N.cfg);window.EJS_onGameStart=N.started;window.EJS_onSaveUpdate=N.snap;
+const s=document.createElement('script');s.src=N.cfg.EJS_pathtodata+'loader.js';s.onerror=N.fail;document.head.append(s)})()<\/script>`;
+  $('#screen').appendChild(f);watch();return null
  },
- input(){},
-	 input(state){if(!live)return;const wanted=new Set();Object.keys(state&&state.b||{}).forEach(k=>{if(INPUT_KEYS[k])wanted.add(INPUT_KEYS[k])});[['lx','f','h'],['ly','t','g'],['rx','j','l'],['ry','i','k']].forEach(([axis,neg,pos])=>{const v=state&&Number(state[axis]||0);if(v<-.2)wanted.add(neg);if(v>.2)wanted.add(pos)});pressed.forEach(k=>{if(!wanted.has(k))sendKey(k,'keyup')});wanted.forEach(k=>{if(!pressed.has(k))sendKey(k,'keydown')});pressed.clear();wanted.forEach(k=>pressed.add(k))},
-	 stop(){pressed.forEach(k=>sendKey(k,'keyup'));pressed.clear();if(live)location.reload()}
+ /* Notre manette pilote le moteur : indices RetroPad (0-15) et demi-axes des sticks (16-23) */
+ input(st){const gm=(emu()||{}).gameManager;if(!gm||!live)return;const w={};
+  for(const k in st.b)if(k in IDX)w[IDX[k]]=1;
+  for(const[a,p,n]of AX){const v=st[a]||0;w[p]=v>0?Math.round(v*32767):0;w[n]=v<0?Math.round(-v*32767):0}
+  for(const i in sent)if(!(i in w))w[i]=0;
+  for(const i in w)if(sent[i]!==w[i]){sent[i]=w[i];try{gm.simulateInput(0,+i,w[i])}catch(e){}}},
+ stop(){
+  if(!live)return;live=false;clearInterval(tick);
+  try{window.__nova.kill()}catch(e){}
+  const f=frame();if(f)f.remove();
+  if(url)URL.revokeObjectURL(url);url='';sent={};window.__nova=null;
+  try{localStorage.removeItem('nova.boot')}catch(e){}
+  ['live','tall','booting','started'].forEach(c=>$('#player').classList.remove(c))
+ }
 };
 
 /* ---------- Lecteur et commandes tactiles ---------- */
@@ -328,6 +397,7 @@ const hap=()=>{if(!S.set.hap)return;try{if(navigator.vibrate&&navigator.vibrate(
 let idleT;
 const wake=()=>{const p=$('#player');p.classList.remove('idle');clearTimeout(idleT);if(S.set.fade)idleT=setTimeout(()=>p.classList.add('idle'),2800)};
 $('#player').addEventListener('pointerdown',wake);
+['pointerup','touchend','click'].forEach(t=>$('#player').addEventListener(t,()=>{try{window.__nova&&window.__nova.unlock&&window.__nova.unlock()}catch(e){}}));
 const hold=(k,d)=>{
  cnt[k]=(cnt[k]||0)+d;const on=cnt[k]>0;if(on===!!inp.b[k])return;
  if(on){inp.b[k]=1;hap()}else delete inp.b[k];
@@ -360,13 +430,15 @@ document.querySelectorAll('.stick').forEach(s=>{
 });
 async function play(id){
  const g=all().find(x=>x.id===id);if(!g)return;
+ if(g.id!=='test'&&!FILES.has(id)&&g.st){const b=await db('get',id).catch(()=>0);if(b)FILES.set(id,b instanceof File?b:new File([b],g.fn||'game.iso'))}
  if(g.id!=='test'&&!FILES.has(id)){RELINK=id;$('#file').click();return}
  closeSheet();
  S.recent=[id,...S.recent.filter(x=>x!==id)].slice(0,8);g.last=Date.now();save();SESSION=g.id==='test'?null:{id,at:Date.now()};
  $('#ptitle').textContent=g.name;$('#msg').innerHTML='<b>Chargement…</b>';
  $('#player').classList.toggle('px',!!eff(id).px);$('#player').classList.add('open');mon();wake();
+ if(g.id!=='test'&&!NOENG[g.sys]){boot.on(g);try{localStorage.setItem('nova.boot','1')}catch(e){}}
  const r=await engine.load(g,FILES.get(id));
- if(r)$('#msg').innerHTML=`<b>${esc(r.t)}</b><span>${esc(r.m)}</span>`;
+ if(r){boot.off();try{localStorage.removeItem('nova.boot')}catch(e){}$('#msg').innerHTML=`<b>${esc(r.t)}</b><span>${esc(r.m)}</span>`}
 }
 
 /* ---------- Actions ---------- */
@@ -381,8 +453,8 @@ const A={
  sys:v=>{P.name=$('#nm').value;P.sys=v;addSheet()},
  commit:()=>{
   const g={id:Math.random().toString(36).slice(2,9),name:$('#nm').value.trim()||P.name,sys:P.sys,size:P.file.size};
-  S.games.unshift(g);FILES.set(g.id,P.file);P=null;save();closeSheet();render()},
- del:(v,id)=>{S.games=S.games.filter(g=>g.id!==id);S.recent=S.recent.filter(x=>x!==id);FILES.delete(id);setImg(id,'cv');setImg(id,'sh');save();closeSheet();render()},
+  const f=P.file;g.fn=f.name;S.games.unshift(g);FILES.set(g.id,f);P=null;save();closeSheet();render();toast('Copie du jeu…');db('put',g.id,f).then(()=>{g.st=1;save();toast('Jeu enregistré dans Nova')},()=>toast('Stockage plein : jeu à re-choisir'))},
+ del:(v,id)=>{S.games=S.games.filter(g=>g.id!==id);S.recent=S.recent.filter(x=>x!==id);FILES.delete(id);db('del',id).catch(()=>0);setImg(id,'cv');setImg(id,'sh');save();closeSheet();render()},
  cover:(v,id)=>{COVER=id;$('#img').click()},
  uncover:(v,id)=>{setImg(id,'cv');detail(id);render()},
  q:(v,id,d)=>{tgt(id)[d.p]=v==='1';save();if(id)detail(id);else render()},
@@ -405,14 +477,15 @@ $('#img').onchange=async e=>{
  try{const u=URL.createObjectURL(f),d=await shrink(u,480,640);URL.revokeObjectURL(u);toast(setImg(id,'cv',d)?'Pochette enregistrée':'Stockage plein');detail(id);render()}catch(err){toast('Image illisible')}
 };
 $('#file').onchange=e=>{
- const f=e.target.files[0];e.target.value='';if(!f)return;
+ const fs=[...e.target.files];e.target.value='';const f=fs.filter(x=>!/\.(cue|m3u|ccd|sub)$/i.test(x.name)).sort((a,b)=>b.size-a.size)[0];if(!f)return fs.length&&toast('Choisis le .bin ou .iso, pas le .cue');
  if(RELINK){const id=RELINK;RELINK=null;FILES.set(id,f);play(id);return}
  const x=f.name.split('.').pop().toLowerCase();
-	 const sys=['nes','sfc','smc','gb','gbc','gba','nds','n64','z64','v64'].includes(x)?'nin':x==='cso'?'psp':['cue','pbp','img','ccd','mdf'].includes(x)?'ps1':f.size>7e8?'ps2':'ps1';
-	 const g={id:Math.random().toString(36).slice(2,9),name:f.name.replace(/\.[^.]+$/,'').replace(/_+/g,' ').trim()||'Nouveau jeu',sys,size:f.size};
-	 S.games.unshift(g);FILES.set(g.id,f);P=null;save();render();play(g.id);
+ const sys=['nes','sfc','smc','gb','gbc','gba','nds','n64','z64','v64'].includes(x)?'nin':x==='cso'?'psp':['cue','pbp','img','ccd','mdf','chd','bin'].includes(x)?'ps1':f.size>7.4e8?'ps2':'ps1';
+ P={file:f,sys,name:f.name.replace(/\.[^.]+$/,'').replace(/_+/g,' ').trim()};
+ addSheet();
 };
 
+try{if(localStorage.getItem('nova.boot')){localStorage.removeItem('nova.boot');setTimeout(()=>toast('Dernier lancement interrompu : mémoire ?'),700)}}catch(e){}
 apply();render();mon();
 })();
 </script>
