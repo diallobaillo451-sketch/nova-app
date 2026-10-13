@@ -112,7 +112,7 @@ h3{font:700 26px/1.15 -apple-system,sans-serif;margin:4px 0 14px;letter-spacing:
 #mon{left:50%;right:auto;bottom:10px;transform:translateX(-50%);padding:6px 14px;border-radius:16px;background:rgba(255,255,255,.1);color:#d1d1d6;font:600 13px ui-rounded,-apple-system,sans-serif;letter-spacing:.04em;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 @media(orientation:landscape){#screen{top:0;height:100%;left:50%;right:auto;transform:translateX(-50%)}.zone{transform:scale(calc(var(--sc)*.78))}}
 #ejs{width:100%;height:100%}
-.live .pad{display:none}
+.live .pad{display:flex}
 .live #screen{top:calc(60px + env(safe-area-inset-top,0px));bottom:0;height:auto;aspect-ratio:auto;left:0;right:0;transform:none;padding:0;background:#000;display:block}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -296,22 +296,29 @@ const CDN="https://cdn.emulatorjs.org/stable/data/";
 const CORE={ps1:"psx",nes:"nes",fds:"nes",sfc:"snes",smc:"snes",gb:"gb",gbc:"gb",gba:"gba",nds:"nds",n64:"n64",z64:"n64",v64:"n64"};
 const NOENG={ps2:"PS2 : aucun moteur web. Utilise l'app native Play!.",psp:"PSP : le moteur web ne fonctionne pas sur Safari. Utilise l'app PPSSPP (App Store)."};
 let live=false;
+const EJS_CONTROLS={0:{0:{value:'x',value2:'BUTTON_2'},1:{value:'s',value2:'BUTTON_4'},2:{value:'shift',value2:'SELECT'},3:{value:'enter',value2:'START'},4:{value:'up arrow',value2:'DPAD_UP'},5:{value:'down arrow',value2:'DPAD_DOWN'},6:{value:'left arrow',value2:'DPAD_LEFT'},7:{value:'right arrow',value2:'DPAD_RIGHT'},8:{value:'z',value2:'BUTTON_1'},9:{value:'a',value2:'BUTTON_3'},10:{value:'q',value2:'LEFT_TOP_SHOULDER'},11:{value:'e',value2:'RIGHT_TOP_SHOULDER'},12:{value:'1',value2:'LEFT_BOTTOM_SHOULDER'},13:{value:'3',value2:'RIGHT_BOTTOM_SHOULDER'},14:{value:'',value2:'LEFT_STICK'},15:{value:'',value2:'RIGHT_STICK'},16:{value:'h',value2:'LEFT_STICK_X:+1'},17:{value:'f',value2:'LEFT_STICK_X:-1'},18:{value:'g',value2:'LEFT_STICK_Y:+1'},19:{value:'t',value2:'LEFT_STICK_Y:-1'},20:{value:'l',value2:'RIGHT_STICK_X:+1'},21:{value:'j',value2:'RIGHT_STICK_X:-1'},22:{value:'k',value2:'RIGHT_STICK_Y:+1'},23:{value:'i',value2:'RIGHT_STICK_Y:-1'}},1:{},2:{},3:{}};
+const INPUT_KEYS={tri:'s',cir:'x',crs:'z',sqr:'a',up:'up arrow',down:'down arrow',left:'left arrow',right:'right arrow',L1:'q',R1:'e',L2:'1',R2:'3',select:'shift',start:'enter'};
+const KEY_CODES={'backspace':8,'tab':9,'enter':13,'shift':16,'left arrow':37,'up arrow':38,'right arrow':39,'down arrow':40};
+const pressed=new Set();
+const sendKey=(key,type)=>{const target=$('#ejs')||document;if(!target)return;const name=key.includes('arrow')?({ 'up arrow':'ArrowUp','down arrow':'ArrowDown','left arrow':'ArrowLeft','right arrow':'ArrowRight'})[key]:(key==='shift'?'Shift':key==='enter'?'Enter':key);const code=KEY_CODES[key]||((key.length===1)?key.toUpperCase().charCodeAt(0):0);const e=new KeyboardEvent(type,{key:name,code:name.length===1?'Key'+name.toUpperCase():name,bubbles:true,cancelable:true});Object.defineProperty(e,'keyCode',{value:code});Object.defineProperty(e,'which',{value:code});target.dispatchEvent(e)};
 const snap=async(id,e)=>{try{const s=e&&e.screenshot;if(!s)return;const u=typeof s==='string'?s:URL.createObjectURL(s instanceof Blob?s:new Blob([s],{type:'image/png'}));const d=await shrink(u,640,0);if(typeof s!=='string')URL.revokeObjectURL(u);const g=S.games.find(x=>x.id===id);if(g&&setImg(id,'sh',d)){g.saved=Date.now();save();toast('Sauvegarde détectée')}}catch(err){}};
 const engine={
- async load(g,file){
+	 async load(g,file){
   if(g.id==='test')return{t:'Mode test',m:'Appuie sur les boutons et bouge les sticks pour régler ta disposition.'};
+  if(!file)return{t:'Fichier manquant',m:'Sélectionne à nouveau la ROM pour lancer ce jeu.'};
   if(NOENG[g.sys])return{t:'Moteur indisponible',m:NOENG[g.sys]};
   const ext=file.name.split('.').pop().toLowerCase(),core=g.sys==='ps1'?CORE.ps1:CORE[ext];
   if(!core)return{t:'Format non pris en charge',m:"."+ext+" n'est pas reconnu pour "+SYS[g.sys].n+"."};
   live=true;$('#player').classList.add('live');$('#screen').innerHTML='<div id="ejs"></div>';
   const c=eff(g.id),num=[...g.id].reduce((a,ch)=>(a*31+ch.charCodeAt(0))>>>0,7)%1e9+2;
-  Object.assign(window,{EJS_player:'#ejs',EJS_core:core,EJS_gameUrl:URL.createObjectURL(file),EJS_gameName:g.name,EJS_gameID:num,EJS_pathtodata:CDN,EJS_color:'#0a84ff',EJS_backgroundColor:'#000',EJS_askBeforeExit:false,EJS_volume:c.vol,EJS_forceLegacyCores:!!c.gl1,EJS_fixedSaveInterval:15000,EJS_defaultOptions:Object.assign({'save-state-location':'browser'},c.crt?{shader:'crt-mattias.glslp'}:{}),EJS_onSaveUpdate:e=>snap(g.id,e),EJS_onExit:()=>location.reload()});
+  Object.assign(window,{EJS_player:'#ejs',EJS_core:core,EJS_gameUrl:URL.createObjectURL(file),EJS_gameName:g.name,EJS_gameID:num,EJS_pathtodata:CDN,EJS_color:'#0a84ff',EJS_backgroundColor:'#000',EJS_askBeforeExit:false,EJS_volume:c.vol,EJS_forceLegacyCores:!!c.gl1,EJS_defaultControls:EJS_CONTROLS,EJS_VirtualGamepadSettings:[],EJS_Buttons:{gamepad:{visible:false}},EJS_fixedSaveInterval:15000,EJS_defaultOptions:Object.assign({'save-state-location':'browser','virtual-gamepad':'disabled','menu-bar-button':'hidden'},c.crt?{shader:'crt-mattias.glslp'}:{}),EJS_onSaveUpdate:e=>snap(g.id,e),EJS_onExit:()=>location.reload()});
   const sc=document.createElement('script');sc.src=CDN+'loader.js';
   sc.onerror=()=>{live=false;$('#player').classList.remove('live');$('#screen').innerHTML='<div id="msg"><b>Moteur introuvable</b><span>Le chargement a échoué. Vérifie ta connexion ou l\'hébergement de la page.</span></div><div id="mon"></div>'};
   document.head.appendChild(sc);return null;
  },
  input(){},
- stop(){if(live)location.reload()}
+	 input(state){if(!live)return;const wanted=new Set();Object.keys(state&&state.b||{}).forEach(k=>{if(INPUT_KEYS[k])wanted.add(INPUT_KEYS[k])});[['lx','f','h'],['ly','t','g'],['rx','j','l'],['ry','i','k']].forEach(([axis,neg,pos])=>{const v=state&&Number(state[axis]||0);if(v<-.2)wanted.add(neg);if(v>.2)wanted.add(pos)});pressed.forEach(k=>{if(!wanted.has(k))sendKey(k,'keyup')});wanted.forEach(k=>{if(!pressed.has(k))sendKey(k,'keydown')});pressed.clear();wanted.forEach(k=>pressed.add(k))},
+	 stop(){pressed.forEach(k=>sendKey(k,'keyup'));pressed.clear();if(live)location.reload()}
 };
 
 /* ---------- Lecteur et commandes tactiles ---------- */
@@ -401,9 +408,9 @@ $('#file').onchange=e=>{
  const f=e.target.files[0];e.target.value='';if(!f)return;
  if(RELINK){const id=RELINK;RELINK=null;FILES.set(id,f);play(id);return}
  const x=f.name.split('.').pop().toLowerCase();
- const sys=['nes','sfc','smc','gb','gbc','gba','nds','n64','z64','v64'].includes(x)?'nin':x==='cso'?'psp':['cue','pbp','img','ccd','mdf'].includes(x)?'ps1':f.size>7e8?'ps2':'ps1';
- P={file:f,sys,name:f.name.replace(/\.[^.]+$/,'').replace(/_+/g,' ').trim()};
- addSheet();
+	 const sys=['nes','sfc','smc','gb','gbc','gba','nds','n64','z64','v64'].includes(x)?'nin':x==='cso'?'psp':['cue','pbp','img','ccd','mdf'].includes(x)?'ps1':f.size>7e8?'ps2':'ps1';
+	 const g={id:Math.random().toString(36).slice(2,9),name:f.name.replace(/\.[^.]+$/,'').replace(/_+/g,' ').trim()||'Nouveau jeu',sys,size:f.size};
+	 S.games.unshift(g);FILES.set(g.id,f);P=null;save();render();play(g.id);
 };
 
 apply();render();mon();
