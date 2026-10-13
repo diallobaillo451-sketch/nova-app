@@ -177,6 +177,8 @@ h3{font:700 26px/1.15 -apple-system,sans-serif;margin:4px 0 14px;letter-spacing:
 .ind #bfill{width:38%;animation:ind 1.3s ease-in-out infinite alternate}
 @keyframes ind{to{transform:translateX(163%)}}
 .err #bfill{width:100%;background:#ff453a;animation:none}
+#bact{display:none;gap:10px;margin-top:16px}.err #bact{display:flex}#bact button{font:600 15px -apple-system,sans-serif;padding:11px 22px;border:0;border-radius:999px;color:#fff;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}#bact #bretry{background:var(--blue)}
+.pad,.pad *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #bstat{font:500 13px/1.3 -apple-system,sans-serif;color:rgba(255,255,255,.72);margin-top:10px;min-height:17px}
 @media(orientation:landscape){#bcard{flex-direction:row;gap:34px;text-align:left}#bart{width:min(36vh,150px);margin:0}#btx{align-items:flex-start;width:min(46vw,300px)}}
 @media(prefers-reduced-motion:reduce){#bart,.ind #bfill{animation:none}}
@@ -191,7 +193,7 @@ h3{font:700 26px/1.15 -apple-system,sans-serif;margin:4px 0 14px;letter-spacing:
 <div id="player">
   <div id="pbar"><button class="pill" data-act="quit">Fermer</button><span id="ptitle" class="pill"></span></div>
   <div id="screen"><div id="msg"></div><div id="mon"></div></div>
-  <div id="boot"><div id="bbg"></div><div id="bcard"><div id="bart"></div><div id="btx"><h3 id="bname"></h3><div id="bsys"></div><div id="bar"><i id="bfill"></i></div><div id="bstat" aria-live="polite"></div></div></div></div>
+  <div id="boot"><div id="bbg"></div><div id="bcard"><div id="bart"></div><div id="btx"><h3 id="bname"></h3><div id="bsys"></div><div id="bar"><i id="bfill"></i></div><div id="bstat" aria-live="polite"></div><div id="bact"><button id="bretry">Réessayer</button><button id="bclose">Fermer</button></div></div></div></div>
   <div class="pad">
     <div class="zone zl">
       <div class="sh"><b class="gb" data-k="L2">L2</b><b class="gb" data-k="L1">L1</b></div>
@@ -328,7 +330,7 @@ const detail=id=>{
 const addSheet=()=>openSheet(`<h3>Nouveau jeu</h3>
  <input class="search" id="nm" style="width:100%;margin:0 0 12px" value="${esc(P.name)}" aria-label="Nom du jeu">
  <div class="seg" style="margin:0 0 6px">${Object.keys(SYS).map(k=>`<button class="${P.sys===k?'on':''}" data-act="sys" data-v="${k}">${SYS[k].s}</button>`).join('')}</div>
- <p class="cap" style="margin:6px 4px 0">${esc(P.file.name)}${P.file.size?', '+fmt(P.file.size):''}</p>${/\.(zip|7z|rar)$/i.test(P.file.name)?'<p class="cap" style="margin:6px 4px 0">Archive compressée : la décompression est très lente sur iPhone. Extrais le .iso ou .bin avant.</p>':P.file.size>5.5e8?'<p class="cap" style="margin:6px 4px 0">Image volumineuse : le lancement demande environ deux fois sa taille en mémoire. Un fichier .chd est plus sûr.</p>':''}
+ <p class="cap" style="margin:6px 4px 0">${esc(P.file.name)}${P.file.size?', '+fmt(P.file.size):''}</p>${/\.(zip|7z|rar)$/i.test(P.file.name)?'<p class="cap" style="margin:6px 4px 0">Nova décompresse un .zip une seule fois, à l’installation. Pour .7z ou .rar, extrais le jeu avant.</p>':P.file.size>5.5e8?'<p class="cap" style="margin:6px 4px 0">Image volumineuse : le lancement demande environ deux fois sa taille en mémoire. Un fichier .chd est plus sûr.</p>':''}
  <button class="btn" data-act="commit">Ajouter à la bibliothèque</button>`);
 
 /* ---------- Moteur d'émulation (point de branchement) ---------- */
@@ -347,33 +349,45 @@ const boot={
  set(p,t,err){const b=$('#boot');b.classList.toggle('err',!!err);b.classList.toggle('ind',p==null&&!err);$('#bfill').style.width=p==null?'':Math.round(p)+'%';if(t)$('#bstat').textContent=t},
  off(){clearInterval(tick);const p=$('#player');p.classList.remove('booting');p.classList.add('started')}
 };
+/* ZIP : décompression native du navigateur (DecompressionStream), en flux, une seule fois à l'installation */
+const unzipFast=async f=>{const T=await f.slice(Math.max(0,f.size-65557)).arrayBuffer(),v=new DataView(T);let e=-1;for(let i=T.byteLength-22;i>=0;i--)if(v.getUint32(i,true)===0x06054b50){e=i;break}if(e<0)throw 0;
+const n=v.getUint16(e+10,true),cs=v.getUint32(e+12,true),co=v.getUint32(e+16,true);if(co===0xffffffff)throw 0;
+const C=new DataView(await f.slice(co,co+cs).arrayBuffer()),dc=new TextDecoder();let p=0,B=null;
+for(let i=0;i<n;i++){const m=C.getUint16(p+10,true),c=C.getUint32(p+20,true),z=C.getUint32(p+24,true),nl=C.getUint16(p+28,true),xl=C.getUint16(p+30,true),kl=C.getUint16(p+32,true),o=C.getUint32(p+42,true),nm=dc.decode(new Uint8Array(C.buffer,p+46,nl));p+=46+nl+xl+kl;
+if(!nm.endsWith('/')&&!/\.(txt|nfo|jpe?g|png|diz|url)$/i.test(nm)&&(!B||z>B.z))B={m,z,c,o,nm}}
+if(!B||B.z>=0xffffffff||(B.m!==0&&B.m!==8))throw 0;
+const h=new DataView(await f.slice(B.o,B.o+30).arrayBuffer()),a=B.o+30+h.getUint16(26,true)+h.getUint16(28,true),raw=f.slice(a,a+B.c);
+const b=B.m===0?raw:await new Response(raw.stream().pipeThrough(new DecompressionStream('deflate-raw'))).blob();
+return new File([b],B.nm.split('/').pop(),{type:'application/octet-stream'})};
 /* Lit la progression du moteur (son texte interne, invisible) et la montre dans NOTRE page de lancement */
-const watch=()=>{clearInterval(tick);tick=setInterval(()=>{
+const W={r:0};const watch=()=>{clearInterval(tick);W.t0=W.last=Date.now();W.k='';tick=setInterval(()=>{const now=Date.now();if(now-W.t0>150000||now-W.last>(/moteur/i.test($('#bstat').textContent)?30000:70000))return engine.bad('Chargement interrompu.');
  const f=frame(),d=f&&f.contentDocument;if(!d||!d.body)return;
  const sb=d.querySelector('.ejs_start_button');if(sb&&!sb.dataset.n){sb.dataset.n=1;sb.click()}
  const t=(d.querySelector('.ejs_loading_text')||{}).textContent||'',m=t.match(/(\d+(?:[.,]\d+)?)\s*%/),p=m?parseFloat(m[1].replace(',','.')):null,core=/core/i.test(t);
- if(/error|fail/i.test(t))return boot.set(100,'Le jeu n’a pas pu démarrer. Vérifie le fichier ou ta connexion.',1);
- if(t)boot.set(p==null?null:core?p*.4:40+p*.55,core?'Préparation du moteur':/decompress/i.test(t)?'Décompression du jeu':'Chargement du jeu')},250)};
+ if(/error|fail/i.test(t))return engine.bad('Le jeu n’a pas pu démarrer.');
+ if(t+'|'+p!==W.k){W.k=t+'|'+p;W.last=now}if(t)boot.set(p==null?null:core?p*.4:40+p*.55,core?'Préparation du moteur':/decompress/i.test(t)?'Décompression du jeu':'Chargement du jeu')},250)};
 const engine={
- async load(g,file){
+ async load(g,file,legacy){W.g=g;W.f=file;if(!legacy)W.r=0;
   if(g.id==='test')return{t:'Mode test',m:'Appuie sur les boutons et bouge les sticks pour régler ta disposition.'};
   if(NOENG[g.sys])return{t:'Moteur indisponible',m:NOENG[g.sys]};
   const ext=file.name.split('.').pop().toLowerCase(),core=g.sys==='ps1'?CORE.ps1:CORE[ext];
   if(!core)return{t:'Format non pris en charge',m:"."+ext+" n'est pas reconnu pour "+SYS[g.sys].n+"."};
   const c=eff(g.id),num=[...g.id].reduce((a,ch)=>(a*31+ch.charCodeAt(0))>>>0,7)%1e9+2,pl=$('#player');
   live=true;sent={};pl.classList.add('live');pl.classList.toggle('tall',ext==='nds');url=URL.createObjectURL(file);
-  window.__nova={snap:e=>snap(g.id,e),started:()=>{try{localStorage.removeItem('nova.boot')}catch(e){}boot.off()},fail:()=>boot.set(100,'Moteur introuvable. Vérifie ta connexion.',1),
-   cfg:{EJS_player:'#g',EJS_core:core,EJS_gameUrl:url,EJS_gameName:g.name,EJS_gameID:num,EJS_pathtodata:CDN,EJS_startOnLoaded:true,EJS_disableLocalStorage:true,EJS_askBeforeExit:false,EJS_color:'#0a84ff',EJS_backgroundColor:'#000',EJS_volume:c.vol,EJS_forceLegacyCores:!!c.gl1,EJS_fixedSaveInterval:15000,
+  window.__nova={snap:e=>snap(g.id,e),err:m=>{if(/memory|alloc|abort|RangeError|out of/i.test(m))engine.bad('Mémoire insuffisante.')},started:()=>{try{localStorage.removeItem('nova.boot')}catch(e){}boot.off()},fail:()=>boot.set(100,'Moteur introuvable. Vérifie ta connexion.',1),
+   cfg:{EJS_player:'#g',EJS_core:core,EJS_gameUrl:url,EJS_gameName:g.name,EJS_gameID:num,EJS_pathtodata:CDN,EJS_startOnLoaded:true,EJS_disableLocalStorage:true,EJS_askBeforeExit:false,EJS_color:'#0a84ff',EJS_backgroundColor:'#000',EJS_volume:c.vol,EJS_forceLegacyCores:!!c.gl1||!!legacy,EJS_fixedSaveInterval:15000,
     EJS_CacheLimit:1,EJS_cacheConfig:{enabled:true,cacheMaxSizeMB:2048,cacheMaxAgeMins:43200},EJS_Buttons:BTN,
     EJS_defaultOptions:Object.assign({'save-state-location':'browser','virtual-gamepad':'disabled'},c.crt?{shader:'crt-mattias.glslp'}:{}),EJS_onExit:()=>{}}};
   const f=document.createElement('iframe');f.id='ejsf';f.setAttribute('allow','autoplay;fullscreen');
   f.srcdoc=`<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><style>html,body,#g{margin:0;width:100%;height:100%;background:#000;overflow:hidden}${HIDE}${c.px?'canvas{image-rendering:pixelated}':''}</style><div id=g></div><script>(()=>{const N=parent.__nova,AC=window.AudioContext||window.webkitAudioContext,A=[];
 if(AC){const W=function(...a){const c=new AC(...a);A.push(c);return c};W.prototype=AC.prototype;window.AudioContext=window.webkitAudioContext=W}
 N.unlock=()=>A.forEach(c=>c.state!=='running'&&c.resume().catch(()=>0));N.kill=()=>A.forEach(c=>c.close().catch(()=>0));
-Object.assign(window,N.cfg);window.EJS_onGameStart=N.started;window.EJS_onSaveUpdate=N.snap;
+addEventListener('error',e=>N.err(String(e.message)));addEventListener('unhandledrejection',e=>N.err(String(e.reason)));Object.assign(window,N.cfg);window.EJS_onGameStart=N.started;window.EJS_onSaveUpdate=N.snap;
 const s=document.createElement('script');s.src=N.cfg.EJS_pathtodata+'loader.js';s.onerror=N.fail;document.head.append(s)})()<\/script>`;
   $('#screen').appendChild(f);watch();return null
  },
+ retry(){const{g,f}=W;if(!g)return;engine.stop();boot.on(g);boot.set(null,'Nouvelle tentative…');W.r++;engine.load(g,f,true)},
+ bad(m){clearInterval(tick);if(W.r<1&&W.g){boot.set(null,'Mode compatible…');return setTimeout(engine.retry,300)}boot.set(100,m+' Ferme les autres apps, puis réessaie.',1)},
  /* Notre manette pilote le moteur : indices RetroPad (0-15) et demi-axes des sticks (16-23) */
  input(st){const gm=(emu()||{}).gameManager;if(!gm||!live)return;const w={};
   for(const k in st.b)if(k in IDX)w[IDX[k]]=1;
@@ -390,10 +404,12 @@ const s=document.createElement('script');s.src=N.cfg.EJS_pathtodata+'loader.js';
  }
 };
 
+$('#bretry').onclick=()=>{W.r=0;engine.retry()};$('#bclose').onclick=()=>{try{$('#pbar').firstElementChild.click()}catch(e){}};
 /* ---------- Lecteur et commandes tactiles ---------- */
 const inp={b:{},lx:0,ly:0,rx:0,ry:0},cnt={},SYM={tri:'△',cir:'○',crs:'✕',sqr:'□'};
 const mon=()=>{const k=Object.keys(inp.b).map(x=>SYM[x]||x);$('#mon').textContent=k.length?k.join('  '):'Touche une zone'};
-const hap=()=>{if(!S.set.hap)return;try{if(navigator.vibrate&&navigator.vibrate(8))return;const l=$('#hap');if(l)l.click()}catch(e){}};
+let hT=0;const hap=s=>{if(S.set.hap===false)return;const n=performance.now();if(n-hT<22)return;hT=n;try{if(navigator.vibrate&&navigator.vibrate(s?14:8))return;const l=$('#hap');if(l)l.click()}catch(e){}};
+$('#player').addEventListener('pointerup',e=>{if(e.target.closest&&e.target.closest('[data-k],.stick'))hap()});
 let idleT;
 const wake=()=>{const p=$('#player');p.classList.remove('idle');clearTimeout(idleT);if(S.set.fade)idleT=setTimeout(()=>p.classList.add('idle'),2800)};
 $('#player').addEventListener('pointerdown',wake);
@@ -453,7 +469,7 @@ const A={
  sys:v=>{P.name=$('#nm').value;P.sys=v;addSheet()},
  commit:()=>{
   const g={id:Math.random().toString(36).slice(2,9),name:$('#nm').value.trim()||P.name,sys:P.sys,size:P.file.size};
-  const f=P.file;g.fn=f.name;S.games.unshift(g);FILES.set(g.id,f);P=null;save();closeSheet();render();toast('Copie du jeu…');db('put',g.id,f).then(()=>{g.st=1;save();toast('Jeu enregistré dans Nova')},()=>toast('Stockage plein : jeu à re-choisir'))},
+  const f=P.file;g.fn=f.name;S.games.unshift(g);FILES.set(g.id,f);P=null;save();closeSheet();render();toast('Installation du jeu…');try{navigator.storage.persist()}catch(e){}(/\.zip$/i.test(f.name)&&self.DecompressionStream?unzipFast(f).catch(()=>f):Promise.resolve(f)).then(r=>{g.fn=r.name;g.size=r.size;FILES.set(g.id,r);return db('put',g.id,r)}).then(()=>{g.st=1;save();render();toast('Jeu installé : lancement rapide')},()=>toast('Stockage plein : jeu à re-choisir'))},
  del:(v,id)=>{S.games=S.games.filter(g=>g.id!==id);S.recent=S.recent.filter(x=>x!==id);FILES.delete(id);db('del',id).catch(()=>0);setImg(id,'cv');setImg(id,'sh');save();closeSheet();render()},
  cover:(v,id)=>{COVER=id;$('#img').click()},
  uncover:(v,id)=>{setImg(id,'cv');detail(id);render()},
